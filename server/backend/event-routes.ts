@@ -4,8 +4,7 @@ import express from "express";
 import { Request, Response } from "express";
 
 // some useful database functions in here:
-import {
-} from "./database";
+import { getAllEvents, getEventsBy } from "./database";
 import { Event, weeklyRetentionObject } from "../../client/src/models/event";
 import { ensureAuthenticated, validateMiddleware } from "./helpers";
 
@@ -15,6 +14,7 @@ import {
   userFieldsValidator,
   isUserValidator,
 } from "./validators";
+import { any } from "bluebird";
 const router = express.Router();
 
 // Routes
@@ -28,12 +28,16 @@ interface Filter {
 }
 
 router.get('/all', (req: Request, res: Response) => {
-  res.send('/all')
+  res.send(getAllEvents())
     
 });
 
 router.get('/all-filtered', (req: Request, res: Response) => {
-  res.send('/all-filtered')
+  let {browser} = req.query;
+  if(browser)
+  {
+    res.send(getEventsBy("browser",browser.toString()))
+  }
 });
 
 router.get('/by-days/:offset', (req: Request, res: Response) => {

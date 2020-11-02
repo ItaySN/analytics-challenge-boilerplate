@@ -174,7 +174,22 @@ export const searchUsers = (query: string) => {
 export const removeUserFromResults = (userId: User["id"], results: User[]) =>
   remove({ id: userId }, results);
 
+
+interface Filter {
+  sorting: string; // '+date'/'-date'
+  type: string;
+  browser: string;
+  search: string;
+  offset: number;
+}  
 // convenience methods
+export const getAllEvents = ():Event[] => db.get(EVENT_TABLE).value(); 
+export const getEventsBy = (key: string, value: any) => getAllBy(EVENT_TABLE,key,value);
+
+// export const getEventsFiltered = (filterParams: Filter) =>{
+//   const events = db.get(EVENT_TABLE).value()
+// } 
+  
 
 // User
 export const getUserBy = (key: string, value: any) => getBy(USER_TABLE, key, value);
