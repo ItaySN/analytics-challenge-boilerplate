@@ -4,7 +4,8 @@ import express from "express";
 import { Request, Response } from "express";
 
 // some useful database functions in here:
-import { getAllEvents, getEventsBy } from "./database";
+import { v4 as uuidv4 } from "uuid";
+import { getAllEvents, saveEvent } from "./database";
 import { Event, weeklyRetentionObject } from "../../client/src/models/event";
 import { ensureAuthenticated, validateMiddleware } from "./helpers";
 
@@ -14,7 +15,9 @@ import {
   userFieldsValidator,
   isUserValidator,
 } from "./validators";
-import { any } from "bluebird";
+import { any, fromCallback } from "bluebird";
+import { type } from "os";
+import { uniqueId } from "lodash";
 const router = express.Router();
 
 // Routes
@@ -29,15 +32,63 @@ interface Filter {
 
 router.get('/all', (req: Request, res: Response) => {
   res.send(getAllEvents())
-    
 });
 
 router.get('/all-filtered', (req: Request, res: Response) => {
-  let {browser} = req.query;
-  if(browser)
+  let filter: Filter = req.query;
+  let more:boolean = false
+  let filteredArray: Event[] = getAllEvents();
+  
+  if(filter.browser)
   {
-    res.send(getEventsBy("browser",browser.toString()))
+    filteredArray = filteredArray.filter(event => event.browser === filter.browser)
+    console.log(filteredArray.length,'--------browser')
   }
+  if(filter.type)
+  {
+    filteredArray = filteredArray.filter(event => event.name === filter.type)
+    console.log(filteredArray.length,'------type')
+  }
+  if(filter.search)
+  {
+    filteredArray = filteredArray.filter(event => Object.values(event).some((value: string) => value.toString().includes(filter.search)))
+    console.log(filteredArray.length,'search------------')
+  }
+  if(filter.sorting)
+  {
+    if(filter.sorting === "+date"){
+      filteredArray = filteredArray.sort((a:Event,b:Event)=>{
+        return  a.date - b.date
+      })
+    }
+    else if(filter.sorting === "-date"){
+      filteredArray = filteredArray.sort((a:Event,b:Event)=>{
+        return b.date - a.date
+      })
+    }
+    console.log(filteredArray.length, '----sorting')
+  }
+  if(filter.offset)
+  {
+    let tempArr:Event[]=[];
+    for(let i = 0; i < filter.offset; i++)
+    {
+      if(filteredArray[i])
+      {
+        tempArr[i] = filteredArray[i];
+      }
+    }
+    if(tempArr.length<filteredArray.length)
+    {
+      more = true
+    }
+
+    filteredArray = tempArr;
+    console.log(filteredArray,'-----offset')
+  }
+  res.send({events: filteredArray,
+            more : more
+          })
 });
 
 router.get('/by-days/:offset', (req: Request, res: Response) => {
@@ -65,7 +116,20 @@ router.get('/:eventId',(req : Request, res : Response) => {
 });
 
 router.post('/', (req: Request, res: Response) => {
-  res.send('/')
+
+  const newEvent:Event = {
+    _id : uuidv4(),
+    session_id: uuidv4(),
+    name : req.body.name,
+    url: req.body.url,
+    distinct_user_id: req.body.distinct_user_id,
+    date: req.body.date,
+    os: req.body.os,
+    browser: req.body.browser,
+    geolocation: req.body.geolocation,
+  };
+  saveEvent(newEvent)
+  res.send(`new event was added .  ${newEvent}`)
 });
 
 router.get('/chart/os/:time',(req: Request, res: Response) => {

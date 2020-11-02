@@ -183,8 +183,13 @@ interface Filter {
   offset: number;
 }  
 // convenience methods
+
+//Event
 export const getAllEvents = ():Event[] => db.get(EVENT_TABLE).value(); 
-export const getEventsBy = (key: string, value: any) => getAllBy(EVENT_TABLE,key,value);
+export const getEventsBy = (key: string, value: any):Event[] => getAllBy(EVENT_TABLE,key,value);
+export const saveEvent = (event: Event) => {
+  db.get(EVENT_TABLE).push(event).write();
+};
 
 // export const getEventsFiltered = (filterParams: Filter) =>{
 //   const events = db.get(EVENT_TABLE).value()
