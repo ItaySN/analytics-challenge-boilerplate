@@ -5101,8 +5101,8 @@
       "url": "http://localhost3000/login"
     },
     {
-      "_id": "02e4c22b-056a-4c92-9325-2e076a931e3b",
-      "session_id": "0f143009-4ecb-4ad3-b770-afaaf04dcf8b",
+      "_id": "04bd68e5-d2d3-4990-9527-f6fcb5fbb124",
+      "session_id": "e33b4363-90a0-4cae-8ed7-3ce88bfc8f83",
       "name": "signup",
       "url": "http://localhost3000/signup",
       "distinct_user_id": "eqR0ppLYH",

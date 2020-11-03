@@ -5,7 +5,7 @@ import { Request, Response } from "express";
 
 // some useful database functions in here:
 import { v4 as uuidv4 } from "uuid";
-import { getAllEvents, saveEvent } from "./database";
+import { getAllEvents, saveEvent, formatDate,convertDaysToMili, sessionsByDay } from "./database";
 import { Event, weeklyRetentionObject } from "../../client/src/models/event";
 import { ensureAuthenticated, validateMiddleware } from "./helpers";
 
@@ -15,7 +15,7 @@ import {
   userFieldsValidator,
   isUserValidator,
 } from "./validators";
-import { any, fromCallback } from "bluebird";
+import { any, filter, fromCallback } from "bluebird";
 import { type } from "os";
 import { uniqueId } from "lodash";
 const router = express.Router();
@@ -42,17 +42,14 @@ router.get('/all-filtered', (req: Request, res: Response) => {
   if(filter.browser)
   {
     filteredArray = filteredArray.filter(event => event.browser === filter.browser)
-    console.log(filteredArray.length,'--------browser')
   }
   if(filter.type)
   {
     filteredArray = filteredArray.filter(event => event.name === filter.type)
-    console.log(filteredArray.length,'------type')
   }
   if(filter.search)
   {
     filteredArray = filteredArray.filter(event => Object.values(event).some((value: string) => value.toString().includes(filter.search)))
-    console.log(filteredArray.length,'search------------')
   }
   if(filter.sorting)
   {
@@ -66,7 +63,6 @@ router.get('/all-filtered', (req: Request, res: Response) => {
         return b.date - a.date
       })
     }
-    console.log(filteredArray.length, '----sorting')
   }
   if(filter.offset)
   {
@@ -84,7 +80,6 @@ router.get('/all-filtered', (req: Request, res: Response) => {
     }
 
     filteredArray = tempArr;
-    console.log(filteredArray,'-----offset')
   }
   res.send({events: filteredArray,
             more : more
@@ -92,8 +87,10 @@ router.get('/all-filtered', (req: Request, res: Response) => {
 });
 
 router.get('/by-days/:offset', (req: Request, res: Response) => {
-  res.send('/by-days/:offset')
+  let offset:number = parseInt(req.params.offset);
+  res.send(sessionsByDay(offset))
 });
+
 
 router.get('/by-hours/:offset', (req: Request, res: Response) => {
   res.send('/by-hours/:offset')

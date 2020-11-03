@@ -69,6 +69,7 @@ import {
   isCommentNotification,
 } from "../../client/src/utils/transactionUtils";
 import { DbSchema } from "../../client/src/models/db-schema";
+import { last, sum } from "lodash";
 
 
 export type TDatabase = {
@@ -191,11 +192,49 @@ export const saveEvent = (event: Event) => {
   db.get(EVENT_TABLE).push(event).write();
 };
 
-// export const getEventsFiltered = (filterParams: Filter) =>{
-//   const events = db.get(EVENT_TABLE).value()
-// } 
-  
+import {OneDay} from './timeFrames'
+import { any, fromCallback } from "bluebird";
+import { count } from "console";
+import { stringify } from "querystring";
 
+export const formatDate = (date:Date):string =>{
+  var displayDate = ("0" + date.getDate()).slice(-2) + "/" +
+    ("0" + (date.getMonth() + 1)).slice(-2) + "/" +
+    ( + date.getFullYear())
+  return displayDate;
+}
+export const convertDaysToMili = (days: number) => days * 24 * 60 * 60 * 1000;
+
+export const datesOfAweek = (firstdate:number):{}[] =>{ 
+  let datesObj:{date:string, count:number}[] = [];
+  for(let i = 0; i < 7; i++)
+  {
+    let dispalyDate:string = formatDate(new Date(firstdate + OneDay * i))
+    datesObj.push({date:dispalyDate,count:0})
+  }
+  return datesObj;
+}
+
+export const sessionsByDay = (offset:number) => {
+  let lastDate:number = new Date(new Date().toDateString()).getTime() + convertDaysToMili(1 - offset);
+  let firstDate: number = new Date(new Date().toDateString()).getTime() - convertDaysToMili(offset + 6); 
+  let datesArr  = datesOfAweek(firstDate)
+  let events = db.get(EVENT_TABLE)
+  .filter((event:Event) => (event.date < lastDate) && (event.date > firstDate))
+  .sort((a:Event,b:Event) => a.date - b.date ) 
+  .groupBy((event:Event) => formatDate(new Date(event.date))).value()
+  let eventsByDay:any;
+  eventsByDay = Object.keys(events).map((key) => {
+  let uniqEvent:Event[] = uniqBy("session_id",events[key])
+    return {date: key , count : uniqEvent.length}
+  })
+  eventsByDay.map((date:any) => {
+    let index:number = datesArr.findIndex((date2:any) => date.date === date2.date)
+    if(index > -1)
+      datesArr[index] = date
+  })
+  return datesArr;
+}
 // User
 export const getUserBy = (key: string, value: any) => getBy(USER_TABLE, key, value);
 export const getUserId = (user: User): string => user.id;
