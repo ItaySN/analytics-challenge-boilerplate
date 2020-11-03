@@ -21,7 +21,7 @@ import {
   countBy,
   groupBy,
 } from "lodash/fp";
-import { isWithinInterval } from "date-fns";
+import { endOfDay, isWithinInterval, startOfDay } from "date-fns";
 import low from "lowdb";
 import FileSync from "lowdb/adapters/FileSync";
 import shortid from "shortid";
@@ -192,10 +192,12 @@ export const saveEvent = (event: Event) => {
   db.get(EVENT_TABLE).push(event).write();
 };
 
-import {OneDay} from './timeFrames'
+import {OneDay, OneHour} from './timeFrames'
 import { any, fromCallback } from "bluebird";
-import { count } from "console";
+import { Console, count } from "console";
 import { stringify } from "querystring";
+import { start } from "repl";
+import { ConfigSet } from "ts-jest/dist/config/config-set";
 
 export const formatDate = (date:Date):string =>{
   var displayDate = ("0" + date.getDate()).slice(-2) + "/" +
@@ -203,6 +205,12 @@ export const formatDate = (date:Date):string =>{
     ( + date.getFullYear())
   return displayDate;
 }
+export const formatHour = (date: Date): string => {
+  var displayDate = ("0" + date.getHours()).slice(-2) + ":" +
+    ("0" + "0");
+  return displayDate;
+}
+
 export const convertDaysToMili = (days: number) => days * 24 * 60 * 60 * 1000;
 
 export const datesOfAweek = (firstdate:number):{}[] =>{ 
@@ -215,6 +223,15 @@ export const datesOfAweek = (firstdate:number):{}[] =>{
   return datesObj;
 }
 
+export const hoursOfADay = (startOfTheDay:number):{}[] =>{
+  let hoursObj:{hour:string, count:number}[] = [];
+  for(let i = 0; i < 24; i++){
+    let displayHour:string = formatHour(new Date(startOfTheDay + OneHour * i))
+    hoursObj.push({hour:displayHour , count:0})
+  }
+  return hoursObj;
+}
+
 export const sessionsByDay = (offset:number) => {
   let lastDate:number = new Date(new Date().toDateString()).getTime() + convertDaysToMili(1 - offset);
   let firstDate: number = new Date(new Date().toDateString()).getTime() - convertDaysToMili(offset + 6); 
@@ -223,7 +240,7 @@ export const sessionsByDay = (offset:number) => {
   .filter((event:Event) => (event.date < lastDate) && (event.date > firstDate))
   .sort((a:Event,b:Event) => a.date - b.date ) 
   .groupBy((event:Event) => formatDate(new Date(event.date))).value()
-  let eventsByDay:any;
+  let eventsByDay:{}[];
   eventsByDay = Object.keys(events).map((key) => {
   let uniqEvent:Event[] = uniqBy("session_id",events[key])
     return {date: key , count : uniqEvent.length}
@@ -233,8 +250,35 @@ export const sessionsByDay = (offset:number) => {
     if(index > -1)
       datesArr[index] = date
   })
+  
+
   return datesArr;
 }
+
+export const sessionByHour = (offset:number) =>{
+  let endOfTheDay:number = new Date(new Date().toDateString()).getTime() + convertDaysToMili(1-offset);
+  let startOfTheDay:number = new Date(new Date().toDateString()).getTime() - convertDaysToMili(offset);
+  let hoursArr = hoursOfADay(startOfTheDay);
+  console.log(hoursArr , ' hours arr')
+  let events = db.get(EVENT_TABLE)
+  .filter((event:Event) => (event.date < endOfTheDay) && (event.date > startOfTheDay))
+  .sort((a:Event, b:Event) => a.date - b.date)
+  .groupBy((event:Event) => formatHour(new Date(event.date))).value()
+  let eventsByHour = Object.keys(events).map((key) => {
+    let uniqEvent:Event[] = uniqBy("session_id", events[key])
+    return {hour:key , count: uniqEvent.length}
+  })
+  eventsByHour.map((date: any) => {
+    let index: number = hoursArr.findIndex((date2: any) => date.hour === date2.hour)
+    if (index > -1)
+      hoursArr[index] = date
+  })
+  return hoursArr;
+  // return eventsByHour;
+
+}
+
+
 // User
 export const getUserBy = (key: string, value: any) => getBy(USER_TABLE, key, value);
 export const getUserId = (user: User): string => user.id;
