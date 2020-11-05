@@ -21,7 +21,7 @@ import {
   countBy,
   groupBy,
 } from "lodash/fp";
-import { isWithinInterval } from "date-fns";
+import { endOfDay, isWithinInterval, startOfDay } from "date-fns";
 import low from "lowdb";
 import FileSync from "lowdb/adapters/FileSync";
 import shortid from "shortid";
@@ -69,6 +69,7 @@ import {
   isCommentNotification,
 } from "../../client/src/utils/transactionUtils";
 import { DbSchema } from "../../client/src/models/db-schema";
+import { last, sum } from "lodash";
 
 
 export type TDatabase = {
@@ -174,7 +175,218 @@ export const searchUsers = (query: string) => {
 export const removeUserFromResults = (userId: User["id"], results: User[]) =>
   remove({ id: userId }, results);
 
+
+interface Filter {
+  sorting: string; // '+date'/'-date'
+  type: string;
+  browser: string;
+  search: string;
+  offset: number;
+}  
 // convenience methods
+
+//Event
+export const getAllEvents = ():Event[] => db.get(EVENT_TABLE).value(); 
+export const getEventsBy = (key: string, value: any):Event[] => getAllBy(EVENT_TABLE,key,value);
+export const saveEvent = (event: Event) => {
+  db.get(EVENT_TABLE).push(event).write();
+};
+
+import {OneDay, OneHour, OneWeek} from './timeFrames'
+import { any, fromCallback } from "bluebird";
+import { Console, count } from "console";
+import { stringify } from "querystring";
+import { start } from "repl";
+import { ConfigSet } from "ts-jest/dist/config/config-set";
+import { eventNames } from "process";
+import { el } from "date-fns/locale";
+
+export const getDateInFullFormat = (dateNow: number): string =>{
+  let year = new Date(dateNow).getFullYear()
+  let day = new Date(dateNow).getDate()
+  let month = new Date(dateNow).getMonth() + 1;
+  let hours = new Date(dateNow).getHours()
+  let minutes = new Date(dateNow).getMinutes()
+  return `${year}/${month}/${day}/${hours}/${minutes}`;
+}
+
+export const formatDate = (date:Date):string =>{
+  var displayDate = ("0" + date.getDate()).slice(-2) + "/" +
+    ("0" + (date.getMonth() + 1)).slice(-2) + "/" +
+    ( + date.getFullYear())
+  return displayDate;
+}
+
+export const formatHour = (date: Date): string => {
+  var displayDate = ("0" + date.getHours()).slice(-2) + ":" +
+    ("0" + "0");
+  return displayDate;
+}
+
+export const convertDaysToMili = (days: number) => days * 24 * 60 * 60 * 1000;
+
+export const datesOfAweek = (firstdate:number):{}[] =>{ 
+  let datesObj:{date:string, count:number}[] = [];
+  for(let i = 0; i < 7; i++)
+  {
+    
+    let dispalyDate:string = formatDate(new Date(firstdate + OneDay * i))
+    datesObj.push({date:dispalyDate,count:0})
+  }
+  return datesObj;
+}
+
+export const hoursOfADay = (startOfTheDay:number):{}[] =>{
+  let hoursObj:{hour:string, count:number}[] = [];
+  for(let i = 0; i < 24; i++){
+    let displayHour:string = formatHour(new Date(startOfTheDay + OneHour * i))
+    hoursObj.push({hour:displayHour , count:0})
+  }
+  return hoursObj;
+}
+
+export const sessionsByDay = (offset:number) => {
+  let lastDate:number = new Date(new Date().toDateString()).getTime() + convertDaysToMili(1 - offset);
+  let firstDate: number = new Date(new Date().toDateString()).getTime() - convertDaysToMili(offset + 6); 
+  let datesArr  = datesOfAweek(firstDate)
+  let events = db.get(EVENT_TABLE)
+  .filter((event:Event) => (event.date < lastDate) && (event.date > firstDate))
+  .sort((a:Event,b:Event) => a.date - b.date ) 
+  .groupBy((event:Event) => formatDate(new Date(event.date))).value()
+  let eventsByDay:{}[];
+  eventsByDay = Object.keys(events).map((key) => {
+  let uniqEvent:Event[] = uniqBy("session_id",events[key])
+    return {date: key , count : uniqEvent.length}
+  })
+  eventsByDay.map((date:any) => {
+    let index:number = datesArr.findIndex((date2:any) => date.date === date2.date)
+    if(index > -1)
+      datesArr[index] = date
+  })
+  
+
+  return datesArr;
+}
+
+export const sessionByHour = (offset:number) =>{
+  let endOfTheDay:number = new Date(new Date().toDateString()).getTime() + convertDaysToMili(1-offset);
+  let startOfTheDay:number = new Date(new Date().toDateString()).getTime() - convertDaysToMili(offset);
+  let hoursArr = hoursOfADay(startOfTheDay);
+  let events = db.get(EVENT_TABLE)
+  .filter((event:Event) => (event.date < endOfTheDay) && (event.date > startOfTheDay))
+  .sort((a:Event, b:Event) => a.date - b.date)
+  .groupBy((event:Event) => formatHour(new Date(event.date))).value()
+  let eventsByHour = Object.keys(events).map((key) => {
+    let uniqEvent:Event[] = uniqBy("session_id", events[key])
+    return {hour:key , count: uniqEvent.length}
+  })
+  eventsByHour.map((date: any) => {
+    let index: number = hoursArr.findIndex((date2: any) => date.hour === date2.hour)
+    if (index > -1)
+      hoursArr[index] = date
+  })
+  return hoursArr;
+}
+
+export const signUpUsersOfOneWeek = (dayZero:number):string[] => {
+  let start:number = new Date(new Date(dayZero + 2 * OneHour).toDateString()).getTime()
+  let endOfTheWeek:number = start + OneWeek;
+  let endDate:number = new Date(new Date(endOfTheWeek).toDateString()).getTime()
+  endOfTheWeek = endDate
+  console.log(new Date(start) + ' + ' + new Date(endOfTheWeek))
+  // if(new Date(endOfTheWeek).getHours()!==0)
+  // {
+  //   endOfTheWeek = new Date(endOfTheWeek).setHours(23,59,59)
+  //   console.log(getDateInFullFormat(endOfTheWeek))
+  //   console.log(`start : ${formatDate(new Date(startOfTheWeek))} end : ${formatDate(new Date(endOfTheWeek))}`)
+  // }
+  let events:Event[] = db.get(EVENT_TABLE)
+  .filter((event:Event) => (event.date > start) && (event.date < endOfTheWeek))
+  .filter((event:Event) => (event.name === 'signup')).value()
+  let newUsers:string[] = [] 
+  events.map((event:Event) => newUsers.push(event.distinct_user_id))
+  return newUsers;
+}
+
+export const howManyLogInPercent = (dayZero:number,signUpUsers:string[]):number => {
+  let count:number = 0;
+  let checkArr = Array(signUpUsers.length).fill(0);
+  let endOfTheWeek:number = dayZero + OneWeek + 2 * OneHour
+  endOfTheWeek = new Date(endOfTheWeek).getTime()
+  let events:Event[] = db.get(EVENT_TABLE)
+  .filter((event:Event) => (event.date < endOfTheWeek)&&(event.date > dayZero))
+  .filter((event:Event) => event.name === 'login').value()
+  for(let i = 0; i < signUpUsers.length; i++)
+  {
+    for(let j = 0; j < events.length; j++)
+    {
+      if((signUpUsers[i] === events[j].distinct_user_id) && (checkArr[i] === 0))
+      {
+          count += 1
+          checkArr[i] = 1;
+      }
+    }
+  }
+  return Math.round((count * 100) / (signUpUsers.length))
+}
+
+export const retentionFunc = (dayZero: number, lastDay: number): {}[] => {
+  let retentionArr: {}[] = [];
+  let i = 0;
+  let firstDate: number;
+  let percentWeeks:number[] = [];
+  let tempDayZero = dayZero;
+  do {
+    firstDate = new Date(new Date((dayZero)).toDateString()).getTime();
+    let signUpsArr:string[] = signUpUsersOfOneWeek(dayZero);
+    while(tempDayZero<=lastDay)
+    {
+      if(percentWeeks.length !== 0)
+      {
+        percentWeeks.push(howManyLogInPercent(tempDayZero,signUpsArr))
+      }
+      else{
+        percentWeeks.push(100)
+      }
+      tempDayZero = tempDayZero + OneWeek
+    }
+    let firstDateDisplay: string = formatDate(new Date(dayZero));
+    dayZero = dayZero + OneWeek;
+    // if (new Date(dayZero).getHours() !== 0) {
+    //     dayZero = new Date(dayZero).setHours(23, 59, 59)
+    //     console.log(getDateInFullFormat(dayZero))
+    //     console.log(`start : ${formatDate(new Date(firstDate))} end : ${formatDate(new Date(dayZero))}`)
+    //   }
+    tempDayZero = dayZero;
+    retentionArr[i] = { registrationWeek: i, newUsers: signUpsArr.length, weeklyRetention: percentWeeks, firstDate: firstDateDisplay, lastDate: formatDate(new Date(dayZero - OneDay + 2 * OneHour))}
+    percentWeeks = []
+    i += 1
+  } while (dayZero <= lastDay)
+  return retentionArr;
+}
+
+interface weeklyRetentionObject {
+  registrationWeek: number;  //launch is week 0 and so on
+  newUsers: number;  // how many new user have joined this week
+  weeklyRetention: number[]; // for every week since, what percentage of the users came back. weeklyRetention[0] is always 100% because it's the week of registration  
+  start: string;  //date string for the first day of the week
+  end: string  //date string for the first day of the week
+}
+export const retention = (dayZero: number) =>{
+
+  // let start:Date = new Date(new Date(dayZero).setHours(0,0,0))
+  let start: Date = new Date(new Date(dayZero).setHours(6, 0, 0))
+  start = new Date(start.setHours(0,0,0))
+  let dayZeroMill:number = start.getTime()
+  // let end:Date = new Date(new Date().setHours(23,59,59))
+  let end: Date = new Date(new Date().setHours(6, 0, 0))
+  end = new Date(end.setHours(23, 59, 59)) 
+  let endDate:number = end.getTime();
+  let registrationWeeks:any[] = retentionFunc(dayZeroMill,endDate)
+  return registrationWeeks
+}
+
+
 
 // User
 export const getUserBy = (key: string, value: any) => getBy(USER_TABLE, key, value);
