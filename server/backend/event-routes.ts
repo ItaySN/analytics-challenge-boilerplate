@@ -5,7 +5,7 @@ import { Request, Response } from "express";
 
 // some useful database functions in here:
 import { v4 as uuidv4 } from "uuid";
-import { getAllEvents, saveEvent, formatDate,convertDaysToMili, sessionsByDay, sessionByHour } from "./database";
+import { getAllEvents, saveEvent, formatDate,convertDaysToMili, sessionsByDay, sessionByHour, retention } from "./database";
 import { Event, weeklyRetentionObject } from "../../client/src/models/event";
 import { ensureAuthenticated, validateMiddleware } from "./helpers";
 
@@ -107,7 +107,7 @@ router.get('/week', (req: Request, res: Response) => {
 
 router.get('/retention', (req: Request, res: Response) => {
   const {dayZero} = req.query
-  res.send('/retention')
+  res.send(retention(parseInt(dayZero)))
 });
 router.get('/:eventId',(req : Request, res : Response) => {
   res.send('/:eventId')
