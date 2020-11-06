@@ -18601,17 +18601,6 @@
       "balance": 75609,
       "createdAt": "2020-10-01T09:13:42.678Z",
       "modifiedAt": "2020-10-29T19:34:28.576Z"
-    },
-    {
-      "id": "GLXTQVxY_",
-      "uuid": "74a2f10b-e7ed-42cf-8c4e-7047d2e3e85c",
-      "firstName": "itay",
-      "lastName": "sn",
-      "username": "itaysn",
-      "password": "$2a$10$8Qp3.EEeogYSQPnbPB9m4OUAJ.fOUfgi3odS8p61Kl//qYkdqug9W",
-      "balance": 0,
-      "createdAt": "2020-11-05T11:22:02.806Z",
-      "modifiedAt": "2020-11-05T11:22:02.806Z"
     }
   ],
   "contacts": [
@@ -20366,17 +20355,6 @@
       "isDeleted": false,
       "createdAt": "2019-10-31T03:08:47.374Z",
       "modifiedAt": "2020-10-29T06:01:00.266Z"
-    },
-    {
-      "id": "eHjY8VmcL",
-      "uuid": "3f6d6ca4-852b-48cd-a74e-6bdf83160d8b",
-      "userId": "GLXTQVxY_",
-      "bankName": "123456",
-      "accountNumber": "123456789",
-      "routingNumber": "123456789",
-      "isDeleted": false,
-      "createdAt": "2020-11-05T11:22:31.856Z",
-      "modifiedAt": "2020-11-05T11:22:31.856Z"
     }
   ],
   "transactions": [

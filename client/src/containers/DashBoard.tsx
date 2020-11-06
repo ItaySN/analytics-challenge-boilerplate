@@ -1,6 +1,7 @@
 
 import ChartByDays from "components/Charts/ChartsByDays";
 import ChartByHours from "components/Charts/ChartsByHours";
+import RetentionCharts from "components/Charts/RetentionCharts";
 import React from "react";
 import { Interpreter } from "xstate";
 import { AuthMachineContext, AuthMachineEvents } from "../machines/authMachine";
@@ -14,6 +15,7 @@ const DashBoard: React.FC = () => {
     <>
     <ChartByDays/>
     <ChartByHours/>
+    <RetentionCharts/>
     </>
   );
 };

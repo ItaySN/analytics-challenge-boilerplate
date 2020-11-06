@@ -356,7 +356,7 @@ export const retentionFunc = (dayZero: number, lastDay: number): {}[] => {
     let firstDateDisplay: string = formatDate(new Date(dayZero));
     dayZero = dayZero + OneWeek;
     tempDayZero = dayZero;
-    retentionArr[i] = { registrationWeek: i, newUsers: signUpsArr.length, weeklyRetention: percentWeeks, firstDate: firstDateDisplay, lastDate: formatDate(new Date(dayZero - OneDay + 2 * OneHour))}
+    retentionArr[i] = { registrationWeek: i, newUsers: signUpsArr.length, weeklyRetention: percentWeeks, start: firstDateDisplay, end: formatDate(new Date(dayZero - OneDay + 2 * OneHour))}
     percentWeeks = []
     i += 1
   } while (dayZero <= lastDay)
@@ -367,8 +367,8 @@ interface weeklyRetentionObject {
   registrationWeek: number;  //launch is week 0 and so on
   newUsers: number;  // how many new user have joined this week
   weeklyRetention: number[]; // for every week since, what percentage of the users came back. weeklyRetention[0] is always 100% because it's the week of registration  
-  firstDate: string;  //date string for the first day of the week
-  lastDate: string  //date string for the first day of the week
+  start: string;  //date string for the first day of the week
+  end: string  //date string for the first day of the week
 }
 export const retention = (dayZero: number):weeklyRetentionObject[] =>{
   let start: Date = new Date(new Date(dayZero).setHours(6, 0, 0))
