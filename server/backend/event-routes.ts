@@ -5,7 +5,7 @@ import { Request, Response } from "express";
 
 // some useful database functions in here:
 import { v4 as uuidv4 } from "uuid";
-import { getAllEvents, saveEvent, formatDate,convertDaysToMili, sessionsByDay, sessionByHour, retention } from "./database";
+import { getAllEvents, saveEvent, formatDate, convertDaysToMili, sessionsByDay, sessionByHour, retention, countByOs, countByBrowser } from "./database";
 import { Event, weeklyRetentionObject } from "../../client/src/models/event";
 import { ensureAuthenticated, validateMiddleware } from "./helpers";
 
@@ -96,6 +96,14 @@ router.get('/by-hours/:offset', (req: Request, res: Response) => {
   let offset:number = parseInt(req.params.offset);
   res.send(sessionByHour(offset))
 });
+
+router.get('/by-os', (req:Request,res:Response) => {
+  res.send(countByOs())
+})
+
+router.get('/by-browser', (req: Request, res: Response) => {
+  res.send(countByBrowser())
+})
 
 router.get('/today', (req: Request, res: Response) => {
   res.send('/today')

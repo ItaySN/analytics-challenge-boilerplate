@@ -35,7 +35,7 @@ const ChartByDays: React.FC = () => {
     return (
         <div className="chartTile">
             <div className="chartTileHeader">
-                <h1>Sessions (Days):</h1>
+                <h1>Sessions (by Days):</h1>
                 <MuiPickersUtilsProvider utils={DateFnsUtils}>
                     <KeyboardDatePicker
                         disableToolbar
