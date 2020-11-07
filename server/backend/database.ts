@@ -69,7 +69,7 @@ import {
   isCommentNotification,
 } from "../../client/src/utils/transactionUtils";
 import { DbSchema } from "../../client/src/models/db-schema";
-import { last, sum } from "lodash";
+import { last, sum, values } from "lodash";
 
 
 export type TDatabase = {
@@ -200,6 +200,7 @@ import { start } from "repl";
 import { ConfigSet } from "ts-jest/dist/config/config-set";
 import { eventNames } from "process";
 import { el } from "date-fns/locale";
+import { Dictionary } from "express-serve-static-core";
 
 export const getDateInFullFormat = (dateNow: number): string =>{
   let year = new Date(dateNow).getFullYear()
@@ -281,8 +282,8 @@ export const sessionsByDay = (offset:number):dayCountObj[] => {
 export const sessionByHour = (offset:number):hourCountObj[] =>{
   let endOfTheDay:number = new Date(new Date().toDateString()).getTime() + convertDaysToMili(1-offset);
   let startOfTheDay:number = new Date(new Date().toDateString()).getTime() - convertDaysToMili(offset);
-  let hoursArr = hoursOfADay(startOfTheDay);
-  let events = db.get(EVENT_TABLE)
+  let hoursArr:hourCountObj[] = hoursOfADay(startOfTheDay);
+  let events:Dictionary<Event[]> = db.get(EVENT_TABLE)
   .filter((event:Event) => (event.date < endOfTheDay) && (event.date > startOfTheDay))
   .sort((a:Event, b:Event) => a.date - b.date)
   .groupBy((event:Event) => formatHour(new Date(event.date))).value()
@@ -370,6 +371,7 @@ interface weeklyRetentionObject {
   start: string;  //date string for the first day of the week
   end: string  //date string for the first day of the week
 }
+
 export const retention = (dayZero: number):weeklyRetentionObject[] =>{
   let start: Date = new Date(new Date(dayZero).setHours(6, 0, 0))
   start = new Date(start.setHours(0,0,0))
@@ -381,7 +383,63 @@ export const retention = (dayZero: number):weeklyRetentionObject[] =>{
   return registrationWeeks
 }
 
+export interface osCount {
+  name:string,
+  value:number
+}
 
+export const countByOs = ():osCount[] =>{
+  const events:Dictionary<Event[]> = db.get(EVENT_TABLE)
+    .groupBy((event: Event) => (event.os)).value()
+  const countsArray: osCount[] = []
+  let count:number = 0;
+
+  for(let j = 0; j < Object.keys(events).length; j++)
+  {
+    count+= Object.values(events)[j].length;
+  }
+
+  for(let i = 0 ; i < Object.keys(events).length; i++)
+  {
+    
+    countsArray.push(
+      {
+        name: Object.keys(events)[i],
+        value: (((Object.values(events)[i].length)* 100) / count)
+      }
+    )
+  }
+
+  return countsArray;
+}
+
+export interface browserCount {
+  name: string,
+  value: number
+}
+
+export const countByBrowser = (): browserCount[] => {
+  const events: Dictionary<Event[]> = db.get(EVENT_TABLE)
+    .groupBy((event: Event) => (event.browser)).value()
+  const countsArray: osCount[] = []
+  let count: number = 0;
+
+  for (let j = 0; j < Object.keys(events).length; j++) {
+    count += Object.values(events)[j].length;
+  }
+
+  for (let i = 0; i < Object.keys(events).length; i++) {
+
+    countsArray.push(
+      {
+        name: Object.keys(events)[i],
+        value: (((Object.values(events)[i].length) * 100) / count)
+      }
+    )
+  }
+
+  return countsArray;
+}
 
 // User
 export const getUserBy = (key: string, value: any) => getBy(USER_TABLE, key, value);
