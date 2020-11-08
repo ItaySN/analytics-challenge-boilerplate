@@ -12,6 +12,7 @@ import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ByLogStyle from 'components/Styles/ByLogStyle';
 
 
 
@@ -69,7 +70,9 @@ const LogCharts:React.FC = () =>{
     return(
         <>  
             <h1>Events Log:</h1>
-            <div style={{display:"flex",flexDirection:"row",width:"60vw"}}>
+            <ByLogStyle>
+
+            
                 <div style={{ display: "flex", flexDirection:"column" }}>
                         <TextField id="filter-search" label="Search" onChange={handleSearch} />
                         <FormControl style={{ width: "10vw" }}>
@@ -166,7 +169,7 @@ const LogCharts:React.FC = () =>{
                         </InfiniteScroll>
                     }   
                 </div>
-            </div>
+            </ByLogStyle>
         </>
     )
 }

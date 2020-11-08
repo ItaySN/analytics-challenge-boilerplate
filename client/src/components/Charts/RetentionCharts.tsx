@@ -7,6 +7,7 @@ import 'date-fns';
 import DateFnsUtils from '@date-io/date-fns';
 import { dayZero } from '../../../../server/scripts/seedDataUtils';
 import { retention } from '../../../../server/backend/database';
+import ByRetentionStyle from 'components/Styles/ByRetentionStyle';
 
 const RetentionCharts:React.FC = () => {
     const [retentionEvents,setRetentionEvent] = useState<weeklyRetentionObject[]>([])
@@ -22,6 +23,29 @@ const RetentionCharts:React.FC = () => {
         setSelectedDate(date);
         setDayZero(date!.getTime())
     };
+
+    const colorByPercent = (num:number) =>{
+    switch (true) {
+            case (num < 21):
+            return <td style={{ border: "1px solid black", backgroundColor: " #b3d1ff", fontSize: "18px", borderCollapse: "collapse" }}>{`${num}%`} </td>
+
+            case (num < 41 && num > 20):
+            return <td style={{ border: "1px solid black", backgroundColor: "#b3d1ff", fontSize: "18px", borderCollapse: "collapse" }}>{`${num}%`} </td>
+
+            case (num < 61 && num > 40):
+            return <td style={{ border: "1px solid black", backgroundColor: "  #80b3ff", fontSize: "18px", borderCollapse: "collapse" }}>{`${num}%`} </td>
+
+            case (num < 81 && num > 60):
+            return <td style={{ border: "1px solid black", backgroundColor: "#4d94ff", fontSize: "18px", borderCollapse: "collapse" }}>{`${num}%`} </td>
+            
+        case (num < 91 && num > 80):
+            return <td style={{ border: "1px solid black", backgroundColor: " #0066ff", fontSize: "18px", borderCollapse: "collapse" }}>{`${num}%`} </td>
+
+            case (num < 101 && num > 90):
+            return <td style={{ border: "1px solid black", backgroundColor: " #0047b3", fontSize: "18px", borderCollapse: "collapse" }}>{`${num}%`} </td>
+
+        }
+    }
     
     useEffect(() => {
         getData(dayZero)
@@ -65,29 +89,33 @@ const RetentionCharts:React.FC = () => {
                 </div>
             </>
             <>
-                <table style={{border:"1px solid black", fontSize: "18px", borderCollapse:"collapse"}}>
+                <ByRetentionStyle>
+                    <table style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse" }}>
                         <tr style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse" }}>
                             <td style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse" }}>
-                            <span>All users</span> <br/> <span> {countAllUsers()} </span>
-                    </td>
-                            {retentionEvents.map((obj: weeklyRetentionObject) => {
-                                return <td style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse" }}>{`week: ${obj.registrationWeek}`}</td>
-                    })}
-                    </tr>
-                    {retentionEvents.map((obj:weeklyRetentionObject)=>{
-                        return <tr style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse" }}>
-                            <td style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse" }}>
-                    <span>{`${obj.start} - ${obj.end}`}</span> <br/> <span>{`${obj.newUsers} users`}</span>
+                                <span style={{ fontWeight: "bold" }}>All users</span> <br /> <span style={{ color:"#b3b3b3"}}> {countAllUsers()} </span>
                             </td>
-                            {obj.weeklyRetention.map((percentOfAWeek: number) => {
-                                return <td style=  {{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse" }}>{`${percentOfAWeek}%`} </td>
+                            {retentionEvents.map((obj: weeklyRetentionObject) => {
+                                return <td style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse", color: "#808080" }}>{`week: ${obj.registrationWeek}`}</td>
                             })}
                         </tr>
-                    })}
-                </table>
+                        {retentionEvents.map((obj: weeklyRetentionObject) => {
+                            return <tr style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse" }}>
+                                <td style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse" }}>
+                                    <span style={{ fontWeight: "bold" }}>{`${obj.start} - ${obj.end}`}</span> <br /> <span style={{ color: "#b3b3b3" }}>{`${obj.newUsers} users`}</span>
+                                </td>
+                                {obj.weeklyRetention.map((percentOfAWeek: number) => {
+                                    return colorByPercent(percentOfAWeek)
+                                })}
+                            </tr>
+                        })}
+                    </table>
+                </ByRetentionStyle>
             </>
         </>
     )
 }
+
+
 
 export default RetentionCharts;
