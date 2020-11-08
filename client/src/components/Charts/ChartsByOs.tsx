@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {osCount} from '../../../../server/backend/database'
 import axios from 'axios'
-import {PieChart,Pie,Cell,Tooltip} from 'recharts'
+import {PieChart,Pie,Cell,Tooltip,Legend} from 'recharts'
 import { Color } from '@material-ui/core'
 
 const ChartsByOs:React.FC = () =>{
@@ -17,20 +17,23 @@ const ChartsByOs:React.FC = () =>{
     useEffect(() =>{
         getData()
     },[])
-
-
+    
     return(
         <>
             <div>
-                <h1>Session by OS:</h1>
-                <PieChart width={730} height={250}>
-                    <Pie data={eventsByOs} cx="50%" dataKey="value" cy="50%" outerRadius={80} label>
+                <h1>Session by OS {`(%)`}:</h1>
+                <PieChart width={500} height={250}>
+                    <Pie data={eventsByOs} cx="50%" dataKey="value" cy="50%" outerRadius={50} label>
                         {
                             eventsByOs.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={colors[index]} />
                             ))
                         }
                     </Pie>
+                    <Legend 
+                    layout="vertical"
+                    align="left"
+                    verticalAlign="middle"/>
                     <Tooltip/>
                 </PieChart>
             </div>

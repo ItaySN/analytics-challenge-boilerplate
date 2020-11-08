@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { browserCount } from '../../../../server/backend/database'
 import axios from 'axios'
-import { PieChart, Pie, Cell, Tooltip } from 'recharts'
+import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts'
 import { Color } from '@material-ui/core'
 
 const ChartsByBrowser: React.FC = () => {
@@ -22,15 +22,20 @@ const ChartsByBrowser: React.FC = () => {
     return (
         <>
             <div>
-                <h1>Session by Browser:</h1>
-                <PieChart width={730} height={250}>
-                    <Pie data={eventsByBrowser} cx="50%" dataKey="value" cy="50%" outerRadius={80} label>
+                <h1>Session by Browser{'(%)'}:</h1>
+                <PieChart width={500} height={250}>
+                    <Pie data={eventsByBrowser} cx="50%" dataKey="value" cy="50%" outerRadius={50} label>
+                    
                         {
                             eventsByBrowser.map((entry, index) => (
                                 <Cell key={`cell-${index}`} fill={colors[index]} />
                             ))
                         }
                     </Pie>
+                    <Legend
+                        layout="vertical"
+                        align="left"
+                        verticalAlign="middle" />
                     <Tooltip />
                 </PieChart>
             </div>

@@ -9,6 +9,11 @@ import { Interpreter } from "xstate";
 import { AuthMachineContext, AuthMachineEvents } from "../machines/authMachine";
 import LogCharts from "components/Charts/LogCharts";
 import ChartsByBrowser from "components/Charts/ChartsByBrowser";
+import ChartsByPageViews from "components/Charts/ChartsByPageViews";
+import AdminPage from "components/Styles/AdminPage";
+import PieChartsStyle from "components/Styles/PieChartsStyle"
+import ByHoursDays from "components/Styles/ByHoursDays";
+import SectionThree from "components/Styles/SectionThree";
 
 export interface Props {
   authService: Interpreter<AuthMachineContext, any, AuthMachineEvents, any>;
@@ -17,13 +22,28 @@ export interface Props {
 const DashBoard: React.FC = () => {
   return (
     <>
-    <ChartByDays/>
-    <ChartByHours/>
-    <RetentionCharts/>
-    <GoogleMapCharts/>
-    <ChartsByOs/>
-    <ChartsByBrowser/>
-    <LogCharts/>
+    <h1 style={{textAlign:"center",fontSize:"3em"}}>Admin Page</h1>
+    <AdminPage>
+      
+      <ByHoursDays>
+        <ChartByDays/>
+        <ChartByHours/>
+      </ByHoursDays>
+
+        <PieChartsStyle>
+          <ChartsByOs/>
+          <ChartsByBrowser/> 
+        </PieChartsStyle>
+
+        <SectionThree>
+          <ChartsByPageViews />
+          <GoogleMapCharts/>
+        </SectionThree>
+
+        <RetentionCharts/>
+        <LogCharts/>
+     
+    </AdminPage>
     </>
   );
 };

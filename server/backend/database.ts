@@ -440,6 +440,25 @@ export const countByBrowser = (): browserCount[] => {
 
   return countsArray;
 }
+export interface urlCount {
+  name: string,
+  pageViews: number
+}
+
+export const countByUrl = ():urlCount[] =>{
+  const events: Dictionary<Event[]> = db.get(EVENT_TABLE)
+    .groupBy((event: Event) => (event.url)).value()
+  const countsArray: urlCount[] = []
+  for (let i = 0; i < Object.keys(events).length; i++) {
+    countsArray.push(
+      {
+        name: Object.keys(events)[i].slice(21),
+        pageViews: Object.values(events)[i].length,
+      }
+    )
+  }
+  return countsArray;
+}
 
 // User
 export const getUserBy = (key: string, value: any) => getBy(USER_TABLE, key, value);
