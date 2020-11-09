@@ -53,8 +53,7 @@ const ChartByDays: React.FC = () => {
                 </MuiPickersUtilsProvider>
             </div>
             <div className="chartTileLineChart">
-                <LineChart width={450} height={250} data={events}
-                    margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <LineChart width={500} height={250} data={events}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="date" />
                     <YAxis/>

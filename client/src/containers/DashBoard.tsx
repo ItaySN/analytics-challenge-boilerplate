@@ -14,6 +14,7 @@ import AdminPage from "components/Styles/AdminPage";
 import PieChartsStyle from "components/Styles/PieChartsStyle"
 import ByHoursDays from "components/Styles/ByHoursDays";
 import SectionThree from "components/Styles/SectionThree";
+import ErrorBoundary from "components/Errors/ErrorBoundary";
 
 export interface Props {
   authService: Interpreter<AuthMachineContext, any, AuthMachineEvents, any>;
@@ -24,25 +25,39 @@ const DashBoard: React.FC = () => {
     <>
     <h1 style={{textAlign:"center",fontSize:"3em"}}>Admin Page</h1>
     <AdminPage>
-      
       <ByHoursDays>
-        <ChartByDays/>
-        <ChartByHours/>
+        <ErrorBoundary>
+          <ChartByDays/>
+        </ErrorBoundary>
+        <ErrorBoundary>
+          <ChartByHours/>
+        </ErrorBoundary>
       </ByHoursDays>
 
-        <PieChartsStyle>
+      <PieChartsStyle>
+        <ErrorBoundary>
           <ChartsByOs/>
+        </ErrorBoundary>
+        <ErrorBoundary>
           <ChartsByBrowser/> 
-        </PieChartsStyle>
+        </ErrorBoundary>
+          <ErrorBoundary>
+            <ChartsByPageViews />
+          </ErrorBoundary>
+      </PieChartsStyle>
 
-        <SectionThree>
-          <ChartsByPageViews />
+      <SectionThree>
+        <ErrorBoundary>
           <GoogleMapCharts/>
-        </SectionThree>
-
+        </ErrorBoundary>
+      </SectionThree>
+      
+      <ErrorBoundary>
         <RetentionCharts/>
+      </ErrorBoundary>
+      <ErrorBoundary>
         <LogCharts/>
-     
+      </ErrorBoundary>
     </AdminPage>
     </>
   );

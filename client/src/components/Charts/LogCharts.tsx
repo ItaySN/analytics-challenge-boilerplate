@@ -12,6 +12,7 @@ import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import Typography from '@material-ui/core/Typography';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import styled, { StyledComponent } from 'styled-components'
 import ByLogStyle from 'components/Styles/ByLogStyle';
 
 
@@ -67,13 +68,17 @@ const LogCharts:React.FC = () =>{
         return displayDate;
     }
 
+    const BOLDSPAN: StyledComponent<"span", any, {}, never> = styled.span`
+        font-weight:"bold";
+    `;
+
     return(
         <>  
             <h1>Events Log:</h1>
             <ByLogStyle>
 
             
-                <div style={{ display: "flex", flexDirection:"column" }}>
+                <div style={{display: "flex", flexDirection:"column",width:"10vw"}}>
                         <TextField id="filter-search" label="Search" onChange={handleSearch} />
                         <FormControl style={{ width: "10vw" }}>
                             <InputLabel id="select-sorting">Sorting</InputLabel>
@@ -120,7 +125,7 @@ const LogCharts:React.FC = () =>{
                             </Select>
                         </FormControl>
                 </div>
-                <div style={{width:"45vw"}}>
+                <div style={{width:"65vw",marginLeft:"30px"}}>
                     {events && 
                         <InfiniteScroll
                             dataLength={events.length}
@@ -155,10 +160,10 @@ const LogCharts:React.FC = () =>{
                                                 <Typography>
                                                 {
                                                     <div style={{display:"flex",flexDirection:"column",fontSize:"2vh"}}>
-                                                        <p><span style={{fontWeight:"bold"}}>date: </span><span>{formatDate(new Date(event.date))}</span></p>
-                                                        <p><span style={{ fontWeight: "bold" }}>os: </span><span>{event.os}</span></p>
-                                                        <p><span style={{ fontWeight: "bold" }}>session_id: </span><span>{event.session_id}</span></p>
-                                                        <p><span style={{ fontWeight: "bold" }}>URL: </span><span>{event.url}</span></p>
+                                                        <p><span style={{fontWeight:"bold"}}>date:</span><span>{formatDate(new Date(event.date))}</span></p>
+                                                        <p><span style={{fontWeight:"bold"}}>os:</span > <span>{event.os}</span></p>
+                                                        <p><span style={{fontWeight:"bold"}}>session_id:</span> <span>{event.session_id}</span></p>
+                                                        <p><span style={{fontWeight:"bold"}}>URL:</span><span>{event.url}</span></p>
                                                     </div>
                                                 }
                                                 </Typography>

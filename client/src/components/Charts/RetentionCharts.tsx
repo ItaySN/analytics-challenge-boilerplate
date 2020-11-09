@@ -5,8 +5,7 @@ import axios from "axios";
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import 'date-fns';
 import DateFnsUtils from '@date-io/date-fns';
-import { dayZero } from '../../../../server/scripts/seedDataUtils';
-import { retention } from '../../../../server/backend/database';
+import styled, { StyledComponent } from 'styled-components'
 import ByRetentionStyle from 'components/Styles/ByRetentionStyle';
 
 const RetentionCharts:React.FC = () => {
@@ -24,29 +23,6 @@ const RetentionCharts:React.FC = () => {
         setDayZero(date!.getTime())
     };
 
-    const colorByPercent = (num:number) =>{
-    switch (true) {
-            case (num < 21):
-            return <td style={{ border: "1px solid black", backgroundColor: " #b3d1ff", fontSize: "18px", borderCollapse: "collapse" }}>{`${num}%`} </td>
-
-            case (num < 41 && num > 20):
-            return <td style={{ border: "1px solid black", backgroundColor: "#b3d1ff", fontSize: "18px", borderCollapse: "collapse" }}>{`${num}%`} </td>
-
-            case (num < 61 && num > 40):
-            return <td style={{ border: "1px solid black", backgroundColor: "  #80b3ff", fontSize: "18px", borderCollapse: "collapse" }}>{`${num}%`} </td>
-
-            case (num < 81 && num > 60):
-            return <td style={{ border: "1px solid black", backgroundColor: "#4d94ff", fontSize: "18px", borderCollapse: "collapse" }}>{`${num}%`} </td>
-            
-        case (num < 91 && num > 80):
-            return <td style={{ border: "1px solid black", backgroundColor: " #0066ff", fontSize: "18px", borderCollapse: "collapse" }}>{`${num}%`} </td>
-
-            case (num < 101 && num > 90):
-            return <td style={{ border: "1px solid black", backgroundColor: " #0047b3", fontSize: "18px", borderCollapse: "collapse" }}>{`${num}%`} </td>
-
-        }
-    }
-    
     useEffect(() => {
         getData(dayZero)
     }, [selectedDate])
@@ -62,6 +38,45 @@ const RetentionCharts:React.FC = () => {
             count += retentionEvents[i].newUsers
         }
         return count;
+    }
+
+    const TD:StyledComponent<"td", any, {}, never> = styled.td`
+        border:"1px solid black";
+        font-size:"100px";
+        border-Collapse:"collapse";
+    `;
+    const TR: StyledComponent<"tr", any, {}, never> = styled.tr`
+        border:"1px solid black";
+        font-size:"100px";
+        border-Collapse:"collapse";
+    `;
+    const TABLE: StyledComponent<"table", any, {}, never> = styled.table`
+        border:"1px solid black";
+        font-size:"100px";
+        border-Collapse:"collapse";
+    `;
+
+    const colorByPercent = (num: number) => {
+        switch (true) {
+            case (num < 21):
+                return <TD style={{ backgroundColor: " #b3d1ff", border: "1px solid black", borderCollapse:"collapse"}}>{`${num}%`} </TD>
+
+            case (num < 41 && num > 20):
+                return <TD style={{ backgroundColor: "#b3d1ff", border: "1px solid black"}}>{`${num}%`} </TD>
+
+            case (num < 61 && num > 40):
+                return <TD style={{ backgroundColor: "  #80b3ff", border: "1px solid black"}}>{`${num}%`} </TD>
+
+            case (num < 81 && num > 60):
+                return <TD style={{ backgroundColor: "#4d94ff", border: "1px solid black"}}>{`${num}%`} </TD>
+
+            case (num < 91 && num > 80):
+                return <TD style={{ backgroundColor: " #0066ff", border: "1px solid black"}}>{`${num}%`}</TD>
+
+            case (num < 101 && num > 90):
+                return <TD style={{ backgroundColor: " #0047b3", border: "1px solid black"}}>{`${num}%`} </TD>
+
+        }
     }
 
     return(
@@ -90,26 +105,26 @@ const RetentionCharts:React.FC = () => {
             </>
             <>
                 <ByRetentionStyle>
-                    <table style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse" }}>
-                        <tr style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse" }}>
-                            <td style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse" }}>
-                                <span style={{ fontWeight: "bold" }}>All users</span> <br /> <span style={{ color:"#b3b3b3"}}> {countAllUsers()} </span>
-                            </td>
+                    <TABLE>
+                        <TR>
+                            <TD>
+                                <span style={{ fontWeight: "bold" }}>All users</span> <br /> <span style={{ color: "#b3b3b3" }}> {countAllUsers()} </span>
+                            </TD>        
                             {retentionEvents.map((obj: weeklyRetentionObject) => {
-                                return <td style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse", color: "#808080" }}>{`week: ${obj.registrationWeek}`}</td>
+                                return <TD>{`week: ${obj.registrationWeek}`} </TD> 
                             })}
-                        </tr>
+                        </TR>
                         {retentionEvents.map((obj: weeklyRetentionObject) => {
-                            return <tr style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse" }}>
-                                <td style={{ border: "1px solid black", fontSize: "18px", borderCollapse: "collapse" }}>
+                            return <TR>
+                                <TD>
                                     <span style={{ fontWeight: "bold" }}>{`${obj.start} - ${obj.end}`}</span> <br /> <span style={{ color: "#b3b3b3" }}>{`${obj.newUsers} users`}</span>
-                                </td>
+                                </TD>
                                 {obj.weeklyRetention.map((percentOfAWeek: number) => {
                                     return colorByPercent(percentOfAWeek)
                                 })}
-                            </tr>
+                            </TR>
                         })}
-                    </table>
+                    </TABLE>
                 </ByRetentionStyle>
             </>
         </>

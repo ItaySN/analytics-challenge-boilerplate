@@ -16,7 +16,7 @@ const GoogleMapCharts : React.FC = () =>{
 
     const mapStyle = {
         height: '35vh',
-        width: '30vw'
+        width: '75vw'
     }
 
     const MapTypeStyle = [
@@ -29,8 +29,6 @@ const GoogleMapCharts : React.FC = () =>{
     return(
         <>
             <ByGoogleMapStyle>
-
-            
                 <h1> Cluster Events by Google Maps:</h1>
                 <LoadScript googleMapsApiKey='AIzaSyBh4Sev4yYARt9XdMOaeAUPKPZQZ6iaWcs'
                 >
@@ -65,8 +63,7 @@ const GoogleMapCharts : React.FC = () =>{
                         </MarkerClusterer>
                     </GoogleMap>
                 </LoadScript>
-            </ByGoogleMapStyle>
-        
+            </ByGoogleMapStyle>  
         </>
 
     )
